@@ -1,0 +1,351 @@
+#-------------------------------------------Pract 1 Lev
+a = str(input("Enter the first String: "))
+b = str(input("Enter the second String: "))
+
+def lev(a, b):
+    if len(a) == 0:
+        return len(b)
+    elif len(b) == 0:
+        return len(a)
+    elif a[0] == b[0]:
+        return lev(a[1:], b[1:])
+    else:
+        return 1 + min( lev(a, b[1:]), lev(a[1:], b), lev(a[1:], b[1:]) )
+
+print("Levenshtein distance is:", lev(a, b))
+
+#--------------------------------------------------Pract 2 IFTDF
+import pandas as pd
+from sklearn.feature_extraction.text import CountVectorizer
+
+data = [
+    "red cotton t_shirt, round neck, low price.",
+    "blue cotton t_shirt, V-neck, medium price.",
+    "black cotton t_shirt, round neck, high price.",
+    "white cotton shirt, full sleeves, medium price.",
+    "red silk saree, golden embroidery, high price.",
+    "blue silk saree, silver embroidery, medium price.",
+    "white cotton saree, round neck, medium price.",
+    "red cotton shirt, full sleeves, high price.",
+    "blue silk saree, golden embroidery, low price.",
+    "black silk saree, silver embroidery, medium price.",
+    "white silk saree, round neck, low price.",
+    "red cotton t_shirt, full sleeves, medium price.",
+    "blue cotton shirt, V-neck, low price.",
+    "black cotton saree, golden embroidery, medium price.",
+    "white silk shirt, round neck, high price.",
+    "blue cotton t_shirt, round neck, high price."
+]
+
+vector_init = CountVectorizer()
+x_fit = vector_init.fit_transform(data)
+print("Fit transfer is:")
+print(x_fit.toarray())
+
+print("Feature names:", vector_init.get_feature_names_out())
+
+df = pd.DataFrame(x_fit.toarray(), columns=vector_init.get_feature_names_out())
+print("The generated dataframe is:\n", df)
+
+print("Please enter your cloth preference")
+cloth_type = input("Enter the cloth type: ")
+cloth_color = input("Enter the color you want: ")
+cloth_price = input("Enter the price type: ")
+
+result = df[(df[cloth_type] > 0) & (df[cloth_color] > 0) & (df[cloth_price] > 0)]
+print("The result for the preference specified:\n", result.index.tolist())
+
+'''
+#---------Pract 2 with file handling
+import pandas as pd
+from sklearn.feature_extraction.text import CountVectorizer
+
+ 
+with open("demo2.txt", "r") as file:
+    data = [line.strip() for line in file.readlines() if line.strip()]
+
+vector_init = CountVectorizer()
+x_fit = vector_init.fit_transform(data)
+print("Fit transfer is:")
+print(x_fit.toarray())
+
+print("Feature names:", vector_init.get_feature_names_out())
+
+df = pd.DataFrame(x_fit.toarray(), columns=vector_init.get_feature_names_out())
+print("The generated dataframe is:\n", df)
+
+print("Please enter your cloth preference")
+cloth_type = input("Enter the cloth type: ")
+cloth_color = input("Enter the color you want: ")
+cloth_price = input("Enter the price type: ")
+
+result = df[(df[cloth_type] > 0) & (df[cloth_color] > 0) & (df[cloth_price] > 0)]
+print("The result for the preference specified:\n", result.index.tolist())'''
+
+#-----------------------------------------------------------------------------------Pract 3 Stopwords
+import nltk
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+
+# Download required NLTK data
+nltk.download('stopwords', quiet=True)
+nltk.download('punkt',quiet=True)
+
+# Set of English stopwords
+words = set(stopwords.words('english'))
+
+# Input from user
+sentence = input("Enter the sentence: ")
+
+# Tokenize the sentence
+word_tokens = word_tokenize(sentence)
+
+print("Original sentence:", word_tokens)
+
+final_sentence = []
+for i in word_tokens:
+    if i not in words:
+        final_sentence.append(i)
+
+print("Filtered sentence with no stop words:", final_sentence)
+
+# -----------Pract 3 Stop words  (with file hand)
+import nltk
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+
+nltk.download('stopwords', quiet=True)
+nltk.download('punkt', quiet=True)
+
+with open("demo.txt", "r") as file:
+    text = file.read()
+
+stop_words = set(stopwords.words('english'))
+
+for sentence in text.split('.'):
+    tokens = word_tokenize(sentence.strip())
+    if tokens:
+        print("\nOriginal:", tokens)
+        print("Filtered:", [w for w in tokens if w.lower() not in stop_words])
+#------------------------------------------------------------------------------------ Pract 4 Sentiment
+
+from textblob import TextBlob
+
+with open("abc.txt", "r", encoding="utf-8") as file:
+    para = file.read()
+
+lines = para.split(".")
+print("Sentences:")
+for line in lines:
+    print("\n" + line)
+    text = TextBlob(line)
+    print(text.sentiment)
+
+total_polarity = 0
+total_subjectivity = 0
+num_sentences = len(lines)
+
+for line in lines:
+    text = TextBlob(line)
+    total_polarity += text.sentiment.polarity
+    total_subjectivity += text.sentiment.subjectivity
+
+average_polarity = total_polarity / num_sentences
+average_subjectivity = total_subjectivity / num_sentences
+
+print("\nAverage Sentiment:")
+print(f"Average Polarity: {average_polarity}")
+print(f"Average Subjectivity: {average_subjectivity}")
+
+#--------------------------------------------------------- Pract 5  Stemming lemma
+import nltk
+nltk.download('wordnet',quiet=True)
+
+with open("demo.txt", "r", encoding="utf-8") as file:
+    atext = file.read()
+
+# Porter Stemmer
+stemmer = nltk.stem.PorterStemmer()
+atextlist = atext.split()
+n = len(atextlist)
+c = 0
+
+for word in atextlist:
+    stemword = stemmer.stem(word)
+    if word != stemword:
+        print(word, ":", stemword)
+        c += 1
+
+print(n, ":", c)
+print("Stemming level (approx):", int((c / n) * 100), "%")
+
+# Snowball Stemmer
+from nltk.stem.snowball import SnowballStemmer
+
+print("\n\n==== Snowball Stemmer ====")
+stemmer = SnowballStemmer("english", True)
+c = 0
+
+for word in atextlist:
+    stemword = stemmer.stem(word)
+    if word != stemword:
+        print(word, ":", stemword)
+        c += 1
+
+print(n, ":", c)
+print("Stemming level (approx):", int((c / n) * 100), "%")
+
+# Lemmatizer
+print("\n\n===== Lemmatization =====")
+from nltk.stem import WordNetLemmatizer
+
+wordnet_lemma = WordNetLemmatizer()
+c = 0
+
+for word in atextlist:
+    lemmaword = wordnet_lemma.lemmatize(word)
+    if word != lemmaword:
+        print(word, ":", lemmaword)
+        c += 1
+
+print(n, ":", c)
+print("Lemmatization level (approx):", int((c / n) * 100), "%")
+
+#----------------------------------------------------------------- Pract 6 web scraping
+
+import requests
+from bs4 import BeautifulSoup
+
+def webscrap(WebUrl):        
+    try:
+        code = requests.get(WebUrl, timeout=10)
+        print("Status Code:", code.status_code)
+        
+        if code.status_code != 200:
+            print("Failed to retrieve the webpage.")
+            return
+
+        plain = code.text          
+        s = BeautifulSoup(plain, "html.parser")          
+        
+        # Extract Title, Headings
+        tagsofinterest = ['h1', 'h2', 'h3', 'title']
+        for tags in s.find_all(tagsofinterest):
+            print("Tag Name:", tags.name, ", Tag Text:", tags.text.strip())
+
+        # Extract Meta Description & Keywords
+        meta_desc = s.find("meta", attrs={"name": "description"})
+        meta_keywords = s.find("meta", attrs={"name": "keywords"})
+        
+        print("Meta Description:", meta_desc['content'] if meta_desc else "Not found")
+        print("Meta Keywords:", meta_keywords['content'] if meta_keywords else "Not found")
+        
+        # Extract Paragraph Text
+        paragraphs = s.find_all("p")
+        print("\n--- Paragraphs (First 3) ---")
+        for para in paragraphs[:3]:  # Limit output for readability
+            print(para.text.strip())
+
+        # Extract Links
+        print("\n--- Links ---")
+        for link in s.find_all("a", href=True):
+            print("Href:", link['href'])
+        
+        # Extract Image Sources
+        print("\n--- Image Sources ---")
+        for img in s.find_all("img"):
+            print("Image Source:", img.get('src', 'No source available'))
+
+    except requests.exceptions.RequestException as e:
+        print("Error fetching webpage:", e)
+
+# Call the function with URLs
+webscrap("https://realpython.github.io/fake-jobs/")
+webscrap("https://www.aajtak.in/")
+
+#----------------------------------------------------- PRact 7  Hits
+def calscore(links, scores):
+    nodes = list(links.keys())
+    newscore = [0] * len(scores)
+    for i in range(0, len(scores)):
+        ssum = 0
+        for item in links[nodes[i]]:
+            index = nodes.index(item)
+            ssum = ssum + scores[index]
+        newscore[i] = ssum
+    ssum = sum(newscore)
+    for i in range(0, len(nodes)):
+        newscore[i] = newscore[i] / ssum
+    return newscore
+
+nodes = input("Enter names of Nodes as string: ")
+authscore = [1] * len(nodes)
+hubscore = [1] * len(nodes)
+indict = dict.fromkeys(nodes, "")
+outdict = dict.fromkeys(nodes, "")
+
+ans = 'y'
+while ans == 'y':
+    edge = input("Enter Edge:")
+    indict[edge[1]] = indict[edge[1]] + edge[0]
+    outdict[edge[0]] = outdict[edge[0]] + edge[1]
+    ans = input("Continue?(y/n):")
+
+
+#indict: shows incoming links (who points to this node)
+#outdict: shows outgoing links (where this node points)
+print("indict:", indict)
+print("outdict:", outdict)
+
+for itr in range(0, 3):
+    newauthscore = calscore(indict, hubscore)
+    newhubscore = calscore(outdict, authscore)
+    authscore = newauthscore.copy()
+    hubscore = newhubscore.copy()
+
+print("Authority score:", authscore) #higher if many hubs point to it
+print("Hub score:", hubscore) #higher if it points to many authorities
+print("Highest authority score node:", nodes[authscore.index(max(authscore))]) 
+print("Highest hub score node:", nodes[hubscore.index(max(hubscore))]) 
+#--------------------------------------------------------------------------------- Pract 8 Page rank 
+
+
+nodes = input("Enter names of Nodes as string: ")
+n = len(nodes)
+pgrank = [1/n] * len(nodes)
+indict = dict.fromkeys(nodes, "")
+outdict = dict.fromkeys(nodes, "")
+
+ans = 'y'
+while ans == 'y':
+    edge = input("Enter Edge:")
+    indict[edge[1]] = indict[edge[1]] + edge[0]
+    outdict[edge[0]] = outdict[edge[0]] + edge[1]
+    ans = input("Continue?(y/n):")
+
+print("indict:", indict)
+print("outdict:", outdict)
+
+for itr in range(0, n):
+    newpgrank = [0] * n
+    for i in range(0, len(nodes)):
+        ssum = 0
+        for item in indict[nodes[i]]:
+            x = pgrank[nodes.index(item)]
+            y = len(outdict[item])
+            ssum = ssum + (x / y)
+        newpgrank[i] = ssum
+    pgrank = newpgrank.copy()
+
+#PageRank without damping uses only link structure for rank calculation
+print("Page ranks without damping factor:", pgrank)
+print("\nNode with max pagerank is", nodes[pgrank.index(max(pgrank))])
+
+d = 0.85
+for i in range(0, len(nodes)):
+    pgrank[i] = (1 - d) / n + d * pgrank[i]
+
+#PageRank with damping includes a damping factor to simulate random jumps and ensure rank stability.
+print("\nAfter damping factor:")
+print("\nNew pagerank", pgrank)
+print("\nNode with max pagerank is", nodes[pgrank.index(max(pgrank))])
